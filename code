@@ -1,0 +1,77 @@
+import mysql.connector
+
+mydb = None
+
+def mybd1():
+    global mydb
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="Oto123456",
+        database="schoolsystem"
+    )
+
+
+def admin():
+    edit = input("What would you like to do?\n1.View/edit user profile\n2.Add user\n: ")   
+    if edit == "1":
+        viewuser = input("Who would you like to view/edit/delete? : ")
+        mycursor = mydb.cursor()
+        sql = "SELECT username, password, role_id FROM users WHERE username = %s"
+        mycursor.execute(sql, (viewuser,))
+        user = mycursor.fetchone()
+        if user:
+            print(f"Username: {user[0]}")
+            print(f"Password: {user[1]}")
+            print(f"Occupation: {user[2]}  (0 - Student , 1 - Teacher , 2 - Admin)")
+        edituser = input("Would you like to edit/delete this user? : ")
+
+
+        if edituser == "yes":
+            editordel = input("To edit press 1 , to delete press 2:")
+            if editordel == "1":
+                newusername = input("Enter new username (leave blank to keep current): ")
+                newpassword = input("Enter new password (leave blank to keep current): ")
+                newrole = input("Enter new occupation (leave blank to keep current): ") 
+                if newusername == "":
+                    newusername = user[0]
+                if newpassword == "":
+                    newpassword = user[1]
+                if newrole =="":
+                    newrole = user[2]
+                    
+                update = "UPDATE users SET username = %s, password = %s, role_id = %s WHERE username = %s"
+                updatething = (newusername, newpassword, newrole, viewuser)
+                mycursor.execute(update, updatething)
+                mydb.commit()
+            if editordel == "2":
+                sql = "DELETE FROM users WHERE username = %s"
+                deleteduser = (viewuser)
+                mycursor.execute(sql, deleteduser)
+                mydb.commit()
+
+        
+
+        else:
+            print("placeholder")
+    if edit == "2":
+  
+        addusername = input("What is their chosen username?:")
+        addpassword = input("What is their password:")
+        addrole = input("What is their role (student : 0 , teacher : 1 , admin : 2) : ")
+        addtotal = [(addusername , addpassword , addrole)]
+        print(f"Is this who you want to add?{addtotal}")
+        confirmadd = input("Yes or No : ")
+        if confirmadd == "yes" or "Yes" : 
+            sql = "INSERT INTO users ( username, password , role_id)VALUES (%s, %s ,%s )"
+            mycursor = mydb.cursor()
+            mycursor.executemany(sql, addtotal)
+            mydb.commit()
+
+
+
+
+            
+
+mybd1()
+admin()
